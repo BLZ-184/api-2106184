@@ -1,4 +1,4 @@
-name: Github Actions Docker Image
+name: Github Actions Docker Image CI/CD
 run-name: ${{ github.actor }} is running ${{ github.workflow }}
 on: [push]
 
@@ -23,3 +23,19 @@ jobs:
       file: ./Dockerfile
       push: true
       tags: ${{ secrets.DOCKER_USERNAME }}/api-${{ secrets.NIM }}:latest
+
+ curl_action:
+  name: Perform REST API
+  runs-on: ubuntu-latest
+  needs: push_to_registry
+  steps:
+   - name: Call API 1 (GET)
+     uses: indiesdev/curl@v1.1
+     id: api
+     with:
+      url: "http://154.26.139.201:8080/"
+      method: "GET"
+      accept: 200,201,204
+      log-response: true
+   - name: Use response
+     run: echo ${{ steps.api.outputs.response }}
