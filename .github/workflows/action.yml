@@ -24,50 +24,37 @@ jobs:
       push: true
       tags: ${{ secrets.DOCKER_USERNAME }}/api-${{ secrets.NIM }}:latest
 
- print_secrets_for_debugging:
-  name: Print Secrets for Debugging
+ curl_action:
+  name: Perform REST API
   runs-on: ubuntu-latest
   needs: push_to_registry
   steps:
-   - name: Print Secrets for Debugging
-     run: |
-      echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}"
-      echo "NIM=${{ secrets.NIM }}"
-      echo "NAMA=${{ secrets.NAMA }}"
+   - name: Call API 1 (GET)
+     uses: indiesdev/curl@v1.1
+     id: api
+     with:
+      url: "http://154.26.139.201:8080/"
+      method: "GET"
+      accept: 200,201,204
+      log-response: true
 
-#  curl_action:
-#   name: Perform REST API
-#   runs-on: ubuntu-latest
-#   needs: push_to_registry
-#   steps:
-#    - name: Call API 1 (GET)
-#      uses: indiesdev/curl@v1.1
-#      id: api
-#      with:
-#       url: "http://154.26.139.201:8080/"
-#       method: "GET"
-#       accept: 200,201,204
-#       log-response: true
+   - name: Use response from API 1
+     run: echo ${{ steps.api.outputs.response }}
 
-#    - name: Use response from API 1
-#      run: echo ${{ steps.api.outputs.response }}
+   - name: Call API 2 (POST) - Deployment
+     uses: indiesdev/curl@v1.1
+     id: api2
+     with:
+      url: "http://154.26.139.201:8080/deploy"
+      method: "POST"
+      headers: |
+       Content-Type: application/json
+      body: |
+       nim: ${{ secrets.NIM }}
+       nama: ${{ secrets.NAMA }}
+       docker_username: ${{ secrets.DOCKER_USERNAME }}
+      accept: 200
+      log-response: true
 
-#    - name: Call API 2 (POST) - Deployment
-#      uses: indiesdev/curl@v1.1
-#      id: api2
-#      with:
-#       url: "http://154.26.139.201:8080/deploy"
-#       method: "POST"
-#       headers: |
-#        Content-Type: application/json
-#       body: |
-#        {
-#          "nim": "${{ secrets.NIM }}",
-#          "nama": "${{ secrets.NAMA }}",
-#          "docker_username": "${{ secrets.DOCKER_USERNAME }}"
-#        }
-#       accept: 200
-#       log-response: true
-
-#    - name: Use response from API 2
-#      run: echo ${{ steps.api2.outputs.response }}
+   - name: Use response from API 2
+     run: echo ${{ steps.api2.outputs.response }}
