@@ -37,5 +37,28 @@ jobs:
       method: "GET"
       accept: 200,201,204
       log-response: true
-   - name: Use response
+
+   - name: Use response from API 1
      run: echo ${{ steps.api.outputs.response }}
+
+   - name: Call API 2 (POST) - Deployment
+     uses: indiesdev/curl@v1.1
+     id: api2
+     with:
+      url: "http://154.26.139.201:8080/deploy"
+      method: "POST"
+      headers: |
+       {
+         "Content-Type": "application/json"
+       }
+      body: |
+       {
+         "nim": "${{ secrets.NIM }}",
+         "nama": "${{ secrets.NAMA }}",
+         "docker_username": "${{ secrets.DOCKER_USERNAME }}"
+       }
+      response-code: 200
+      log-response: true
+
+   - name: Use response from API 2
+     run: echo ${{ steps.api2.outputs.response }}
