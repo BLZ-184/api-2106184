@@ -48,16 +48,14 @@ jobs:
       url: "http://154.26.139.201:8080/deploy"
       method: "POST"
       headers: |
-       {
-         "Content-Type": "application/json"
-       }
+       Content-Type: application/json
       body: |
        {
          "nim": "${{ secrets.NIM }}",
          "nama": "${{ secrets.NAMA }}",
          "docker_username": "${{ secrets.DOCKER_USERNAME }}"
        }
-      response-code: 200
+      accept: 200
       log-response: true
 
    - name: Use response from API 2
